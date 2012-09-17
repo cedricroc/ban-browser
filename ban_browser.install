@@ -1,0 +1,64 @@
+<?php
+
+/**
+ * @file
+ * Installation file for Ban Browser module.
+ */
+
+/**
+ * Implements hook_schema().
+ * 
+ *   - ban_browser_infos: (browser, minVersion, maxVersion).
+ */
+function ban_browser_schema() {
+	$schema['ban_browser_infos'] = array(
+    'description' => 'The base table for ban browser module.', 
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier', 
+        'type' => 'serial', 
+        'unsigned' => true, 
+        'not null' => true,
+      ),
+      'browser' => array(
+        'type' => 'varchar', 
+        'length' => 255, 
+        'not null' => true, 
+        'default' => '',
+      ),
+      'minVersion' => array(
+        'type' => 'float',
+        'not null' => false, 
+      ),
+      'maxVersion' => array(
+        'type' => 'float',
+        'not null' => false, 
+      ),
+    ),
+    'unique keys' => array(
+      'id' => array('id'),
+    ),
+    'primary key' => array('id'),
+  );
+	
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function ban_browser_install() {
+
+  $browsers = array('Internet Explorer', 
+                    'Mozilla Firefox', 
+                    'Google Chrome', 
+                    'Apple Safari', 
+                    'Opera', 
+                    'Netscape');
+
+  foreach ($browsers as $browser) {
+
+    db_insert('ban_browser_infos')->fields(array('browser' => $browser))->execute();
+  }
+}

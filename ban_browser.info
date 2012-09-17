@@ -1,0 +1,3 @@
+name = Ban browser
+description = Displays a message on the site if browser is not allowed
+core = 7.x
