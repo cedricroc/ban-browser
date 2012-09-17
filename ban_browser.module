@@ -1,0 +1,85 @@
+<?php
+
+/**
+ * @file
+ * Displays a message on the site if browser is not allowed
+ */
+
+include_once dirname(__FILE__) . '/ban_browser.functions.inc';
+
+/**
+ * Implements hook_menu().
+ */
+function ban_browser_menu() {
+
+  $items['admin/config/system/ban_browser'] = array(
+    'title' => 'Ban browser',
+    'description' => 'Adding widget (HTML element) if browser of visitor is not supported',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ban_browser_admin_settings_form'),
+    'access arguments' => array('administer ban browser'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'ban_browser.admin.inc',
+  );
+
+  return $items;
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+function ban_browser_permission() {
+  return array(
+    'administer ban browser' => array(
+      'title' => t('Administer ban browser'),
+      'description' => t('Perform maintenance tasks for Ban Browser.'),
+    ),
+  );
+}
+
+
+/**
+ * Implementation hook_page_build
+ * Adding HTML element, if browser is not allowed
+ */
+function ban_browser_page_build(&$page) {
+    global $theme;
+    
+    $regions = array_keys(system_region_list($theme));  
+
+    if (in_array('page_bottom', $regions)) {
+
+        $browserInfos = _hook_php_get_browser();
+
+        if ($browserInfos['name'] != 'Unknown') {
+
+            $result = db_select('ban_browser_infos', 'ban')
+                    ->fields('ban')
+                    ->condition('ban.browser', $browserInfos['name'], '=')
+                    ->execute()
+                    ->fetchAssoc();
+
+            $allowed = true;
+
+            if (!empty($result['minVersion']) && $browserInfos['version'] < $result['minVersion']) {
+                $allowed = false;
+            }
+
+            if (!empty($result['maxVersion']) && $browserInfos['version'] > $result['maxVersion']) {
+                $allowed = false;
+            }
+
+
+            if ($allowed === false) {
+
+                $content =  '<div class="ban-browser-alert"><span class="ban-browser-alert-title">Navigateur non maintenu</span><br/><span class="ban-browser-alert-content">Ce site n\'est pas compatible avec votre navigateur Vérifiez que votre version de ' . $browserInfos['name'] . ' est bien à jour. <a href="http://www.browserchoice.eu/">Mettre à jour / installer un navigateur</a></span></div>';
+                
+                $page['page_bottom']['ban_browser'] = array(
+                    '#markup' => $content,
+                    '#weight' => 25,
+                );
+            }
+        }
+    }
+}
