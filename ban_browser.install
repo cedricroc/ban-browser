@@ -55,7 +55,8 @@ function ban_browser_install() {
                     'Google Chrome', 
                     'Apple Safari', 
                     'Opera', 
-                    'Netscape');
+                    'Netscape',
+                    'Googlebot');
 
   foreach ($browsers as $browser) {
 

@@ -31,6 +31,7 @@ function _hook_php_camelize($string = '', $upfirst = false) {
 function _hook_php_get_browser() {
     $u_agent = $_SERVER['HTTP_USER_AGENT']; 
     $bname = 'Unknown';
+    $ub = 'Unknown';
     $platform = 'Unknown';
     $version= "";
 
@@ -76,6 +77,11 @@ function _hook_php_get_browser() {
         $bname = 'Netscape'; 
         $ub = "Netscape"; 
     } 
+    elseif(preg_match('/Googlebot/i',$u_agent)) 
+    { 
+        $bname = 'Googlebot'; 
+        $ub = "Googlebot"; 
+    }
     
     // finally get the correct version number
     $known = array('Version', $ub, 'other');
@@ -92,8 +98,8 @@ function _hook_php_get_browser() {
         //see if version is before or after the name
         if (strripos($u_agent,"Version") < strripos($u_agent,$ub)){
             $version= $matches['version'][0];
-        }
-        else {
+        } elseif (!empty($matches['version'])) {
+
             $version= $matches['version'][1];
         }
     }
